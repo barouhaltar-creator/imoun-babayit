@@ -66,6 +66,42 @@ input[type=text]{font:500 17px var(--body);border:2px solid var(--line);border-r
 textarea{width:100%;min-height:110px;font:14px var(--body);border-radius:12px;border:2px solid var(--line);padding:8px}
 .file{display:block;text-align:center;background:var(--bg);border-radius:14px;padding:12px;cursor:pointer;font-weight:500}
 .file input{position:absolute;opacity:0;width:1px;height:1px}audio{width:100%}
+
+/* ---- modern skin for home, child A and child B (child C keeps its block world) ---- */
+:root{--a:#FF4F8B;--b:#FF8A1F}
+body:not([data-k=c]){--bg:#F3F6FF;--line:#E3E8F5;--mute:#6B7896;--ink:#1D2540;background:radial-gradient(1200px 500px at 100% -10%,#DDE6FF 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#FFE3EE 0,transparent 60%),#F6F8FF;background-attachment:fixed}
+body[data-k=a]{--line:#FFD9E6;--mute:#8C5A70;--ink:#3A1830;background:radial-gradient(900px 480px at 100% -10%,#FFD3E4 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#E5DBFF 0,transparent 60%),#FFF6FA;background-attachment:fixed}
+body[data-k=b]{--line:#CFEAFB;--mute:#4E7088;--ink:#12324A;background:radial-gradient(900px 480px at 100% -10%,#C9ECFF 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#FFE9C9 0,transparent 60%),#F2FAFF;background-attachment:fixed}
+body:not([data-k=c]) main{gap:18px}
+body:not([data-k=c]) h1{font-size:30px;letter-spacing:-.01em}body:not([data-k=c]) h2{font-size:26px;text-align:center}
+body:not([data-k=c]) .card{border-radius:28px;padding:20px;box-shadow:0 1px 2px rgba(29,37,64,.05),0 12px 32px rgba(29,37,64,.08)}
+body:not([data-k=c]) button{border-radius:18px;font-weight:700;border:2px solid var(--line);box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+body:not([data-k=c]) button:active{transform:translateY(4px);box-shadow:0 0 0 var(--line)}
+body:not([data-k=c]) .pri{border:0;border-radius:20px;padding:16px 20px;font-size:21px;background:var(--k);box-shadow:0 5px 0 color-mix(in srgb,var(--k) 70%,#000)}
+body:not([data-k=c]) .pri:active{box-shadow:0 0 0 color-mix(in srgb,var(--k) 70%,#000)}
+body:not([data-k=c]) .pri:disabled{background:var(--line);color:var(--mute);box-shadow:0 5px 0 color-mix(in srgb,var(--line) 80%,#000);opacity:1}
+body:not([data-k=c]) .kid{border:0;border-inline-start:0;padding:16px;box-shadow:0 1px 2px rgba(29,37,64,.05),0 12px 32px rgba(29,37,64,.08);gap:16px}
+body:not([data-k=c]) .kid:active{transform:scale(.98);box-shadow:0 4px 12px rgba(29,37,64,.08)}
+.kid .av{width:76px;height:76px;flex:none;border-radius:24px;display:grid;place-items:center;font-size:42px;background:color-mix(in srgb,var(--k) 16%,#fff)}
+.kid .nm{font-size:23px}.kid .crown{top:-14px;inset-inline-start:-6px;font-size:26px}
+body:not([data-k=c]) .chip{padding:4px 12px;font-weight:700;font-size:13px;background:color-mix(in srgb,var(--k) 10%,#fff);color:var(--mute)}
+body:not([data-k=c]) .chip.on{background:var(--k);color:#fff}
+body:not([data-k=c]) .emo{width:150px;height:150px;margin:4px auto;border-radius:50%;display:grid;place-items:center;font-size:84px;background:radial-gradient(circle at 30% 25%,#fff,color-mix(in srgb,var(--k) 14%,#fff));box-shadow:inset 0 -6px 0 color-mix(in srgb,var(--k) 12%,#fff)}
+body:not([data-k=c]) .prog{height:14px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 2px var(--line)}
+body:not([data-k=c]) .prog i{border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--k) 70%,#fff),var(--k))}
+body:not([data-k=c]) .pic button{font-size:72px;border-radius:26px;padding:18px 4px;background:#fff}
+body:not([data-k=c]) .grid3 button{border-radius:22px;background:#fff}
+body:not([data-k=c]) .two button{border-radius:22px;padding:18px 8px}
+body:not([data-k=c]) .track{height:72px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 2px var(--line)}
+body:not([data-k=c]) .track span{top:12px}body:not([data-k=c]) .track em{top:14px;right:12px}
+body:not([data-k=c]) .stk{gap:8px}body:not([data-k=c]) .stk span{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--k) 12%,#fff);font-size:26px}
+body:not([data-k=c]) .stk span.no{opacity:1;filter:none;background:#F1F3FA;color:transparent;text-shadow:0 0 0 #C9D0E3}
+body:not([data-k=c]) .how{font-size:16px;line-height:1.45}
+body:not([data-k=c]) table{border-collapse:separate;border-spacing:0 6px}body:not([data-k=c]) th,body:not([data-k=c]) td{border:0}
+body:not([data-k=c]) td b{border-radius:10px;padding:4px 0;min-width:30px}
+body:not([data-k=c]) td:not(.n){color:#C9D0E3}
+body:not([data-k=c]) input[type=text]{border-radius:16px;padding:12px}
+.bob{animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
