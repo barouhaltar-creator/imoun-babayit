@@ -310,7 +310,7 @@ const tier=(tab,n)=>{let r=tab[0];for(const x of tab)if(n>=x[0])r=x;return T(r[1
 const rank=(k,n)=>k.id==='c'?'⛏️ '+tier(TIERS,n):tier(RANKS,n);
 const nameOf=k=>S.names[k.id]||T('שם','Name')+' '+(KIDS.indexOf(k)+1);
 const persist=()=>lsSet('ft_state',S);
-const SHEET_URL=''; /* À COMPLÉTER : adresse de l'application web Apps Script de Barouh */
+const SHEET_URL='https://script.google.com/macros/s/AKfycbzLi5zmWI5BWGJAnJ6UwANJa_i1eADKA3OnkSIR7ceTeKe8EDvS2-jCAGfvX656f498OQ/exec';
 function mergeDays(rows){let ch=false;(rows||[]).forEach(v=>{const id=String(v.key||''),m=/^([abc])_(\d{4}-\d{2}-\d{2})$/.exec(id),n=Number(v.n);if(!m||!(n>0))return;const c=S.days[id];
   if(!c||n>c.n){S.days[id]={kid:m[1],date:m[2],n:Math.min(MAXDAY,n),feel:String(v.feel||'')};if(Number(v.r)>0)S.days[id].r=Number(v.r);ch=true;}});return ch;}
 async function pull(){if(!SHEET_URL)return;try{const j=await (await fetch(SHEET_URL)).json();let ch=mergeDays(j.days);
