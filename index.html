@@ -98,6 +98,12 @@ function lock(u,sec){if(!sec)return u;const base=u.textContent;let t=0;u.disable
   if(t>=sec||!u.isConnected){clearInterval(tm);u.disabled=false;u.textContent=base;}else u.textContent=(MIC?'🎤 ':'🔋 ')+Math.round(t/sec*100)+'%';},100);return u;}
 /* robot challenge: speech recognition must understand the word */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const NRM=x=>x.toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').trim();
+function robotScore(target,cb,out){try{const r=new SR(),tw=NRM(target).split(' ').filter(Boolean);let best=0,heard='…',voiced=0;const iv=setInterval(()=>{if(MIC&&level()>TH)voiced+=.1;},100);
+  r.lang=L==='he'?'he-IL':'en-US';r.maxAlternatives=5;
+  r.onresult=e=>{Array.from(e.results[0]).forEach((a,j)=>{const hw=NRM(a.transcript).split(' '),sc=tw.filter(w=>hw.includes(w)).length/tw.length;if(j===0)heard=a.transcript;if(sc>best)best=sc;});};
+  r.onerror=()=>{};r.onend=()=>{clearInterval(iv);if(MIC&&voiced<.8){out.textContent='🤖 '+T('לא שמעתי קול. נסה שוב.','I heard no voice. Try again.');return;}cb(best,heard);};
+  r.start();out.textContent='🤖 '+T('מקשיב...','Listening...');}catch(e){out.textContent='';cb(-1,'');}}
 function robot(target,onOk,out){try{const r=new SR(),n=x=>x.toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').trim();r.lang=L==='he'?'he-IL':'en-US';r.maxAlternatives=5;
   r.onresult=e=>{const alts=Array.from(e.results[0]).map(a=>a.transcript),hit=alts.some(a=>n(a).includes(n(target)));out.textContent='🤖 '+(hit?T('הבנתי: ','I understood: '):T('שמעתי: ','I heard: '))+alts[0];if(hit)onOk();else bad();};
   r.onerror=()=>{out.textContent='🤖 '+T('לא שמעתי. נסה שוב.','I did not hear you. Try again.');};r.start();out.textContent='🤖 '+T('מקשיב...','Listening...');}catch(e){out.textContent='';}}
@@ -269,10 +275,16 @@ function dial(b,ok,items){let hits=0,solo=false;
   const ans=v=>{hits+=v;v?win():bad();nx();};res.hidden=true;
   const mode=h('button',null,solo?'👥 '+T('יש לי שותף','I have a partner'):'👤 '+T('אני לבד','I am alone'));mode.onclick=()=>{solo=!solo;draw();};
   const draw=()=>{mode.textContent=solo?'👥 '+T('יש לי שותף','I have a partner'):'👤 '+T('אני לבד','I am alone');
-   how.textContent=solo?T('אמור את המשפט פעמיים: פעם ברמה שבעיגול, ופעם ברמה 10. הרגשת את ההבדל?','Say the sentence twice: once at the level in the circle, once at level 10. Did you feel the difference?')
+   how.textContent=solo?(SR?T('הרובוט הוא השופט. אמור את המשפט ברמה שבעיגול: במספר נמוך הרובוט לא אמור להבין, במספר גבוה הוא חייב להבין הכול.','The robot is the judge. Say the sentence at the level in the circle: at a low number the robot should not understand, at a high number it must understand everything.'):T('אמור את המשפט פעמיים: פעם ברמה שבעיגול, ופעם ברמה 10. הרגשת את ההבדל?','Say the sentence twice: once at the level in the circle, once at level 10. Did you feel the difference?'))
     :T('רק אתה רואה את המספר. אמור את המשפט בדיוק ברמה הזאת. השותף מנחש את המספר (מותר לטעות ב-1).','Only you see the number. Say the sentence at exactly that level. Your partner guesses the number (1 off is fine).');
    res.replaceChildren(h('button',{onclick:()=>ans(1)},'✔ '+(solo?T('הרגשתי','Felt it'):T('ניחשו','Guessed'))),h('button',{onclick:()=>ans(0)},'✖ '+(solo?T('עוד לא','Not yet'):T('לא ניחשו','Missed'))));};
-  const how=h('div',{class:'how'});spin.onclick=()=>{ring.textContent=num;ring.classList.add('pop');beep(600);spin.remove();mode.remove();res.hidden=false;res.querySelectorAll('button').forEach(u=>lock(u,solo?10:6));};draw();
+  const how=h('div',{class:'how'});const manual=()=>{res.hidden=false;res.querySelectorAll('button').forEach(u=>lock(u,solo?10:6));};
+  spin.onclick=()=>{ring.textContent=num;ring.classList.add('pop');beep(600);spin.remove();mode.remove();if(!(solo&&SR))return manual();
+   const out=h('div',{class:'how cen'}),skip=h('button',{onclick:()=>ans(0)},T('לדלג (בלי לב)','Skip (no heart)')),rb=h('button',{class:'pri'},'🤖 '+T('דבר אל הרובוט','Talk to the robot'));skip.hidden=true;
+   const goal=num<=4?T('המטרה: שהרובוט כמעט לא יבין אותך','Goal: the robot should barely understand you'):num>=7?T('המטרה: שהרובוט יבין הכול','Goal: the robot understands everything'):T('המטרה: שהרובוט יבין בערך חצי','Goal: the robot understands about half');
+   rb.onclick=()=>robotScore(sen,(sc,heard)=>{if(sc<0){rb.remove();return manual();}const good=num<=4?sc<.5:num>=7?sc>=.7:(sc>=.25&&sc<=.85);out.textContent='🤖 '+Math.round(sc*100)+'% · '+heard;
+     if(good){rb.disabled=true;setTimeout(()=>ans(1),1600);}else{bad();skip.hidden=false;}},out);
+   b.append(h('div',{class:'mid'},goal),rb,out,skip);};draw();
   b.replaceChildren(h('div',{class:'row sp'},h('small',null,(i+1)+' / '+items.length+' · ❤️ '+hits),mode),how,ring,h('div',{class:'mid'},sen),
    h('small',{class:'cen'},T('1 = כמעט לא מבינים · 10 = מבינים הכול: פה פתוח, כל אות, קול חזק','1 = almost impossible to understand · 10 = every word is clear: open mouth, every letter, strong voice')),spin,res);},()=>{b.append(h('div',{class:'mid'},'❤️ '+hits+' / '+items.length));ok();});}
 function rec(b,ok,p,kid){const au=h('div'),inp=h('input',{type:'file',id:'recf',accept:'audio/*',capture:''}),msg=h('div',{class:'mid'}),ten=h('div',{class:'ten'});
@@ -298,11 +310,18 @@ const tier=(tab,n)=>{let r=tab[0];for(const x of tab)if(n>=x[0])r=x;return T(r[1
 const rank=(k,n)=>k.id==='c'?'⛏️ '+tier(TIERS,n):tier(RANKS,n);
 const nameOf=k=>S.names[k.id]||T('שם','Name')+' '+(KIDS.indexOf(k)+1);
 const persist=()=>lsSet('ft_state',S);
+const SHEET_URL=''; /* À COMPLÉTER : adresse de l'application web Apps Script de Barouh */
+function mergeDays(rows){let ch=false;(rows||[]).forEach(v=>{const id=String(v.key||''),m=/^([abc])_(\d{4}-\d{2}-\d{2})$/.exec(id),n=Number(v.n);if(!m||!(n>0))return;const c=S.days[id];
+  if(!c||n>c.n){S.days[id]={kid:m[1],date:m[2],n:Math.min(MAXDAY,n),feel:String(v.feel||'')};if(Number(v.r)>0)S.days[id].r=Number(v.r);ch=true;}});return ch;}
+async function pull(){if(!SHEET_URL)return;try{const j=await (await fetch(SHEET_URL)).json();let ch=mergeDays(j.days);
+  if(!editing&&j.names)KIDS.forEach(k=>{const v=j.names[k.id];if(typeof v==='string'&&v&&v!==S.names[k.id]){S.names[k.id]=v.slice(0,20);ch=true;}});
+  if(!cloud){cloud=true;ch=true;}if(ch){persist();if(view==='home'&&!editing)home();}}catch(e){if(cloud){cloud=false;if(view==='home'&&!editing)home();}}}
+function post(o){if(!SHEET_URL)return;try{fetch(SHEET_URL,{method:'POST',body:JSON.stringify(o)}).catch(()=>{});}catch(e){}}
 const q={};
 function push(path,body){if(!db)return;q[path]=(q[path]||Promise.resolve()).then(()=>db.doc(path).set(body)).catch(()=>{cloud=false;if(view==='home')home();});}
 function saveDay(k,feel){const d=today(),id=key(k,d),cur=S.days[id]||{n:0};
- S.days[id]={kid:k,date:d,n:Math.min(MAXDAY,cur.n+1),feel:feel};if(lastR){S.days[id].r=lastR;lastR=0;}persist();push('days/'+id,S.days[id]);}
-function saveNames(){persist();push('config/names',Object.assign({},S.names));}
+ S.days[id]={kid:k,date:d,n:Math.min(MAXDAY,cur.n+1),feel:feel};if(lastR){S.days[id].r=lastR;lastR=0;}persist();push('days/'+id,S.days[id]);post({t:'day',key:id,n:S.days[id].n,feel:feel,r:S.days[id].r||''});}
+function saveNames(){persist();push('config/names',Object.assign({},S.names));post({t:'names',names:S.names});}
 (async function(){try{db=await window.claude.use('db');}catch(e){db=null;}
  if(!db)return;
  db.collection('days').onSnapshot(s=>{let ch=false;s.docs.forEach(d=>{const v=d.data();if(!v||typeof v.n!=='number')return;const c=S.days[d.id];
@@ -384,7 +403,7 @@ function fin(k){const tot=total(k.id),c=k.id==='c',stk=(k.id==='a'?STKA:STK)[(to
   c&&tot<STORY.length?h('div',{class:'how'},'🔓 '+T('הקטע הבא של הסיפור נפתח במשימה הבאה.','The next part of the story unlocks in your next mission.')):null,
   h('button',{class:'pri',onclick:home},T('לטבלה','To the table'))));}
 
-home();
+home();pull();setInterval(()=>{if(view==='home')pull();},30000);
 </script>
 </body>
 </html>
